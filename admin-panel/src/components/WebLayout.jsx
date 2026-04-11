@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useSettings } from '../context/SettingsContext';
 
 export default function WebLayout({ children }) {
     const { user, logout } = useAuth();
     const { cartCount } = useCart();
     const { items: wishlistItems } = useWishlist();
+    const { settings } = useSettings();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -18,8 +20,28 @@ export default function WebLayout({ children }) {
         setMobileMenuOpen(false);
     };
 
+    if (settings.maintenanceMode) {
+        return (
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0f172a', color: '#fff', textAlign: 'center', padding: 20 }}>
+                <h1 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: 16 }}>Under Maintenance</h1>
+                <p style={{ fontSize: '1.25rem', color: '#94a3b8', maxWidth: 600 }}>
+                    We're currently performing some scheduled maintenance to improve your experience.
+                    We'll be back online shortly!
+                </p>
+                <div style={{ marginTop: 32, padding: '12px 24px', background: 'rgba(99, 102, 241, 0.1)', border: '1px solid #6366f1', borderRadius: 8, color: '#818cf8' }}>
+                    {settings.webAppName || 'Shofy'}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            {settings.showPromoBanner && (
+                <div style={{ background: '#6366f1', color: '#fff', textAlign: 'center', padding: '8px 20px', fontSize: '0.875rem', fontWeight: 500 }}>
+                    {settings.promoBannerText}
+                </div>
+            )}
             <header
                 style={{
                     background: 'var(--bg-card)',
@@ -31,7 +53,7 @@ export default function WebLayout({ children }) {
             >
                 <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64, gap: 12, minWidth: 0 }}>
                     <Link to="/" style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em', flexShrink: 0 }} className="header-logo">
-                        Shofy
+                        {settings.webAppName || 'Shofy'}
                     </Link>
 
                     <form onSubmit={handleSearch} style={{ flex: '1', maxWidth: 400, display: 'flex', margin: '0 16px' }}>
@@ -164,7 +186,7 @@ export default function WebLayout({ children }) {
             >
                 <div className="container" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 24 }}>
                     <div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>Shofy</div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>{settings.webAppName || 'Shofy'}</div>
                         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Your store. One place for everything.</p>
                     </div>
                     <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
@@ -175,7 +197,7 @@ export default function WebLayout({ children }) {
                     </div>
                 </div>
                 <div className="container" style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                    © {new Date().getFullYear()} Shofy. Created By RT. All rights reserved.
+                    © {new Date().getFullYear()} {settings.webAppName || 'Shofy'}. Created By RT. All rights reserved.
                 </div>
             </footer>
         </div>

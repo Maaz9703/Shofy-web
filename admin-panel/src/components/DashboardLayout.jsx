@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
 
 const NAV_ITEMS = [
   { to: '/admin',          end: true,  icon: '▦',  label: 'Dashboard' },
@@ -65,6 +66,7 @@ const NavItem = ({ to, icon, label, end }) => (
 
 const DashboardLayout = () => {
   const { user, logout } = useAuth();
+  const { settings } = useSettings();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -82,7 +84,7 @@ const DashboardLayout = () => {
       <aside className="sidebar">
         {/* Logo */}
         <div className="sidebar__logo">
-          <div className="sidebar__logo-text">Shofy</div>
+          <div className="sidebar__logo-text">{settings.adminPanelName || 'Shofy Admin'}</div>
           <div className="sidebar__user">
             <div className="sidebar__avatar">{initials}</div>
             <div style={{ minWidth: 0 }}>

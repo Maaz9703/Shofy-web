@@ -8,11 +8,19 @@ const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [storeName, setStoreName] = useState('');
   const [storeDescription, setStoreDescription] = useState('');
+  const [adminPanelName, setAdminPanelName] = useState('');
+  const [webAppName, setWebAppName] = useState('');
+  const [mobileAppName, setMobileAppName] = useState('');
+  const [promoBannerText, setPromoBannerText] = useState('');
+  const [showPromoBanner, setShowPromoBanner] = useState(false);
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [disableReviews, setDisableReviews] = useState(false);
   const [enableEmailNotifications, setEnableEmailNotifications] = useState(true);
   const [notifications, setNotifications] = useState({ newOrder: true, lowStock: true, dailyReport: false });
 
   const tabs = [
     { id: 'general', label: 'General', icon: '⚙️' },
+    { id: 'features', label: 'Features', icon: '🚀' },
     { id: 'notifications', label: 'Notifications', icon: '🔔' },
     { id: 'security', label: 'Security', icon: '🔒' },
   ];
@@ -23,6 +31,13 @@ const SettingsPage = () => {
       const s = res.data.data || {};
       setStoreName(s.storeName || 'Shofy');
       setStoreDescription(s.storeDescription || 'Your trusted e-commerce platform');
+      setAdminPanelName(s.adminPanelName || 'Shofy Admin');
+      setWebAppName(s.webAppName || 'Shofy Web');
+      setMobileAppName(s.mobileAppName || 'Shofy Mobile');
+      setPromoBannerText(s.promoBannerText || 'Welcome to our store!');
+      setShowPromoBanner(Boolean(s.showPromoBanner));
+      setMaintenanceMode(Boolean(s.maintenanceMode));
+      setDisableReviews(Boolean(s.disableReviews));
       setEnableEmailNotifications(Boolean(s.enableEmailNotifications));
       setNotifications({
         newOrder: Boolean(s.notifications?.newOrder),
@@ -101,6 +116,20 @@ const SettingsPage = () => {
                   <label style={labelStyle}>Store Description</label>
                   <textarea rows={4} value={storeDescription} onChange={(e) => setStoreDescription(e.target.value)} style={inputStyle} />
                 </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+                  <div>
+                    <label style={labelStyle}>Admin Panel Name</label>
+                    <input type="text" value={adminPanelName} onChange={(e) => setAdminPanelName(e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Web App Name</label>
+                    <input type="text" value={webAppName} onChange={(e) => setWebAppName(e.target.value)} style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Mobile App Name</label>
+                    <input type="text" value={mobileAppName} onChange={(e) => setMobileAppName(e.target.value)} style={inputStyle} />
+                  </div>
+                </div>
                 <div>
                   <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <input type="checkbox" checked={enableEmailNotifications} onChange={(e) => setEnableEmailNotifications(e.target.checked)} style={{ width: 'auto', margin: 0 }} />
@@ -113,6 +142,13 @@ const SettingsPage = () => {
                       const payload = {
                         storeName,
                         storeDescription,
+                        adminPanelName,
+                        webAppName,
+                        mobileAppName,
+                        promoBannerText,
+                        showPromoBanner,
+                        maintenanceMode,
+                        disableReviews,
                         enableEmailNotifications,
                         notifications,
                       };
@@ -128,8 +164,66 @@ const SettingsPage = () => {
             </div>
           )}
 
-          {/* Load settings on mount */}
-          
+          {activeTab === 'features' && (
+            <div style={{ background: '#1e293b', padding: 24, borderRadius: 12 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24 }}>App Features</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <div style={{ padding: 16, background: '#0f172a', borderRadius: 8, border: '1px solid #334155' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>Promo Banner</div>
+                      <div style={{ fontSize: 12, color: '#64748b' }}>Show a promotional banner at the top of the web/mobile app</div>
+                    </div>
+                    <input type="checkbox" checked={showPromoBanner} onChange={(e) => setShowPromoBanner(e.target.checked)} />
+                  </div>
+                  {showPromoBanner && (
+                    <input
+                      type="text"
+                      placeholder="Promo banner text..."
+                      value={promoBannerText}
+                      onChange={(e) => setPromoBannerText(e.target.value)}
+                      style={inputStyle}
+                    />
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, background: maintenanceMode ? '#450a0a' : '#0f172a', borderRadius: 8, border: '1px solid #ef4444' }}>
+                  <div>
+                    <div style={{ fontWeight: 600, color: maintenanceMode ? '#fca5a5' : '#fff' }}>Maintenance Mode</div>
+                    <div style={{ fontSize: 12, color: maintenanceMode ? '#f87171' : '#64748b' }}>Restrict access to the apps while performing updates</div>
+                  </div>
+                  <input type="checkbox" checked={maintenanceMode} onChange={(e) => setMaintenanceMode(e.target.checked)} />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 16, background: '#0f172a', borderRadius: 8, border: '1px solid #334155' }}>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>Disable Reviews</div>
+                    <div style={{ fontSize: 12, color: '#64748b' }}>Temporarily hide product reviews and ratings</div>
+                  </div>
+                  <input type="checkbox" checked={disableReviews} onChange={(e) => setDisableReviews(e.target.checked)} />
+                </div>
+
+                <button
+                  onClick={async () => {
+                    try {
+                      const payload = {
+                        storeName, storeDescription, adminPanelName, webAppName, mobileAppName,
+                        promoBannerText, showPromoBanner, maintenanceMode, disableReviews,
+                        enableEmailNotifications, notifications
+                      };
+                      await api.put('/settings', payload);
+                      toast.success('Features updated');
+                    } catch (err) {
+                      toast.error('Failed to save features');
+                    }
+                  }}
+                  style={primaryButtonStyle}
+                >
+                  Save Feature Settings
+                </button>
+              </div>
+            </div>
+          )}
 
           {activeTab === 'notifications' && (
             <div style={{ background: '#1e293b', padding: 24, borderRadius: 12 }}>

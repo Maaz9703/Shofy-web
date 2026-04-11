@@ -4,6 +4,13 @@ const settingsSchema = new mongoose.Schema(
   {
     storeName: { type: String, default: 'Shofy' },
     storeDescription: { type: String, default: 'Your trusted e-commerce platform' },
+    adminPanelName: { type: String, default: 'Shofy Admin' },
+    webAppName: { type: String, default: 'Shofy Web' },
+    mobileAppName: { type: String, default: 'Shofy Mobile' },
+    promoBannerText: { type: String, default: 'Welcome to our store!' },
+    showPromoBanner: { type: Boolean, default: false },
+    maintenanceMode: { type: Boolean, default: false },
+    disableReviews: { type: Boolean, default: false },
     enableEmailNotifications: { type: Boolean, default: true },
     notifications: {
       newOrder: { type: Boolean, default: true },
