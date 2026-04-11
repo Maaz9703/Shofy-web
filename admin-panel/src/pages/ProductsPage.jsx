@@ -36,7 +36,7 @@ const ProductsPage = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const params = {};
+      const params = { limit: 1000 };
       if (search && search.trim()) params.search = search.trim();
       if (selectedCategory && selectedCategory.trim()) params.category = selectedCategory.trim();
       const res = await api.get('/products', { params });
