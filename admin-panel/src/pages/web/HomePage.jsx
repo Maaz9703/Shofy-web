@@ -17,7 +17,7 @@ export default function HomePage() {
         ])
             .then(([prods, cats]) => {
                 setProducts(Array.isArray(prods) ? prods.slice(0, 8) : []);
-                setCategories(Array.isArray(cats) ? cats : []);
+                setCategories(Array.isArray(cats) ? cats.slice(0, 10) : []);
             })
             .catch(() => { })
             .finally(() => setLoading(false));
