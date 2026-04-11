@@ -162,6 +162,31 @@ const ProductsPage = () => {
     }
   };
 
+  const handleImportCSV = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    const toastId = toast.loading('Importing products...');
+    try {
+      await api.post('/products/import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      toast.success('Products imported successfully', { id: toastId });
+      fetchProducts();
+      fetchCategories();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to import products', { id: toastId });
+    } finally {
+      // Clear the input so the same file can be selected again
+      e.target.value = null;
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!confirm('Delete this product?')) return;
     try {
@@ -293,6 +318,19 @@ const ProductsPage = () => {
           <button onClick={exportToCSV} style={{ ...btnStyle, background: '#10b981' }}>
             Export CSV
           </button>
+          <button
+            onClick={() => document.getElementById('csv-import-input').click()}
+            style={{ ...btnStyle, background: '#8b5cf6' }}
+          >
+            Import CSV
+          </button>
+          <input
+            id="csv-import-input"
+            type="file"
+            accept=".csv"
+            onChange={handleImportCSV}
+            style={{ display: 'none' }}
+          />
           <button
             onClick={() => openModal()}
             style={{

@@ -7,11 +7,14 @@ const {
   updateProduct,
   deleteProduct,
   getCategories,
+  importProducts,
 } = require('../controllers/productController');
 const { protect } = require('../middleware/auth');
 const admin = require('../middleware/admin');
+const upload = require('../middleware/multer');
 
 router.get('/categories/list', getCategories);
+router.post('/import', protect, admin, upload.single('csv'), importProducts);
 router.route('/').get(getProducts).post(protect, admin, createProduct);
 router.route('/:id').get(getProduct).put(protect, admin, updateProduct).delete(protect, admin, deleteProduct);
 

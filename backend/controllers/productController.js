@@ -1,4 +1,6 @@
 const Product = require('../models/Product');
+const csv = require('csv-parser');
+const { Readable } = require('stream');
 
 /**
  * @desc    Get all products
@@ -130,6 +132,63 @@ const getCategories = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Import products from CSV
+ * @route   POST /api/products/import
+ * @access  Private/Admin
+ */
+const importProducts = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload a CSV file' });
+    }
+
+    const results = [];
+    const stream = Readable.from(req.file.buffer.toString());
+
+    stream
+      .pipe(csv())
+      .on('data', (data) => {
+        // Basic normalization: trim whitespace and handle keys case-insensitively if needed
+        // For simplicity, we expect headers to match exactly (lower case typically)
+        const product = {
+          title: data.title || data.Title,
+          description: data.description || data.Description,
+          price: parseFloat(data.price || data.Price),
+          stock: parseInt(data.stock || data.Stock, 10),
+          category: data.category || data.Category,
+          image: data.image || data.Image || 'https://via.placeholder.com/300',
+        };
+
+        // Push only if required fields are present
+        if (product.title && product.description && !isNaN(product.price) && product.category) {
+          results.push(product);
+        }
+      })
+      .on('end', async () => {
+        try {
+          if (results.length === 0) {
+            return res.status(400).json({ success: false, message: 'No valid products found in CSV' });
+          }
+
+          const products = await Product.insertMany(results);
+          res.status(201).json({
+            success: true,
+            count: products.length,
+            message: `Successfully imported ${products.length} products`,
+          });
+        } catch (error) {
+          next(error);
+        }
+      })
+      .on('error', (error) => {
+        next(error);
+      });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getProducts,
   getProduct,
@@ -137,4 +196,5 @@ module.exports = {
   updateProduct,
   deleteProduct,
   getCategories,
+  importProducts,
 };
