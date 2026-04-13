@@ -33,7 +33,7 @@ const seedAdmin = async () => {
     return;
   }
   await User.create({
-    name: 'Admin',
+    name: 'Trader Admin',
     email,
     password: 'admin123',
     role: 'admin',

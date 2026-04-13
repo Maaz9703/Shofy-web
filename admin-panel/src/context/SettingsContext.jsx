@@ -5,9 +5,9 @@ const SettingsContext = createContext();
 
 export const SettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState({
-    adminPanelName: 'Shofy Admin',
-    webAppName: 'Shofy Web',
-    mobileAppName: 'Shofy Mobile',
+    adminPanelName: 'Trader Admin',
+    webAppName: 'Trader Web',
+    mobileAppName: 'Trader',
     promoBannerText: 'Welcome to our store!',
     showPromoBanner: false,
     maintenanceMode: false,

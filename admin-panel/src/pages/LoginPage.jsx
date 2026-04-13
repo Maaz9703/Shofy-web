@@ -109,7 +109,7 @@ const LoginPage = () => {
               fontWeight: 900,
               color: '#fff',
               letterSpacing: '-0.05em',
-            }}>S</div>
+            }}>T</div>
             <h1 style={{
               fontSize: '1.75rem',
               fontWeight: 800,
@@ -207,7 +207,7 @@ const LoginPage = () => {
           </form>
 
           <p style={{ textAlign: 'center', marginTop: 24, fontSize: '0.8rem', color: 'var(--text-3)' }}>
-            Shofy Admin © {new Date().getFullYear()}
+            Trader Admin © {new Date().getFullYear()}
           </p>
         </div>
       </div>

@@ -84,12 +84,12 @@ const DashboardLayout = () => {
       <aside className="sidebar">
         {/* Logo */}
         <div className="sidebar__logo">
-          <div className="sidebar__logo-text">{settings.adminPanelName || 'Shofy Admin'}</div>
+          <div className="sidebar__logo-text">{settings.adminPanelName || 'Trader Admin'}</div>
           <div className="sidebar__user">
             <div className="sidebar__avatar">{initials}</div>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user?.name || 'Admin'}
+                {user?.name || 'Trader Admin'}
               </div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.email}
