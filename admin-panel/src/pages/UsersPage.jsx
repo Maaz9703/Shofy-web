@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import { useDebounce } from '../hooks/useDebounce';
 
 const UsersPage = () => {
   const [users, setUsers] = useState([]);
@@ -10,6 +11,7 @@ const UsersPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
+  const debouncedSearch = useDebounce(search, 400);
 
   const fetchUsers = async () => {
     try {
@@ -56,7 +58,7 @@ const UsersPage = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [search, filterRole, sortBy, sortOrder]);
+  }, [debouncedSearch, filterRole, sortBy, sortOrder]);
 
   const handleSort = (field) => {
     if (sortBy === field) {
@@ -186,46 +188,12 @@ const UsersPage = () => {
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user._id} style={{ borderBottom: '1px solid #334155' }}>
-                    <td style={tdStyle}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div
-                          style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: '50%',
-                            background: '#6366f1',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: '#fff',
-                            fontWeight: 600,
-                            fontSize: 16,
-                          }}
-                        >
-                          {user.name?.charAt(0).toUpperCase() || 'U'}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 500 }}>{user.name || 'N/A'}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td style={tdStyle}>{user.email}</td>
-                    <td style={tdStyle}>{getRoleBadge(user.role)}</td>
-                    <td style={tdStyle}>
-                      {user.createdAt
-                        ? new Date(user.createdAt).toLocaleDateString()
-                        : 'N/A'}
-                    </td>
-                    <td style={tdStyle}>
-                      <button
-                        onClick={() => setSelectedUser(user)}
-                        style={{ ...btnStyle, background: '#334155' }}
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
+                  <UserRow
+                    key={user._id}
+                    user={user}
+                    onView={() => setSelectedUser(user)}
+                    getRoleBadge={getRoleBadge}
+                  />
                 ))
               )}
             </tbody>
@@ -352,5 +320,48 @@ const sortButtonStyle = {
   padding: 0,
   fontSize: 14,
 };
+
+const UserRow = memo(({ user, onView, getRoleBadge }) => (
+  <tr style={{ borderBottom: '1px solid #334155' }}>
+    <td style={tdStyle}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            background: '#6366f1',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#fff',
+            fontWeight: 600,
+            fontSize: 16,
+          }}
+        >
+          {user.name?.charAt(0).toUpperCase() || 'U'}
+        </div>
+        <div>
+          <div style={{ fontWeight: 500 }}>{user.name || 'N/A'}</div>
+        </div>
+      </div>
+    </td>
+    <td style={tdStyle}>{user.email}</td>
+    <td style={tdStyle}>{getRoleBadge(user.role)}</td>
+    <td style={tdStyle}>
+      {user.createdAt
+        ? new Date(user.createdAt).toLocaleDateString()
+        : 'N/A'}
+    </td>
+    <td style={tdStyle}>
+      <button
+        onClick={onView}
+        style={{ ...btnStyle, background: '#334155' }}
+      >
+        View Details
+      </button>
+    </td>
+  </tr>
+));
 
 export default UsersPage;

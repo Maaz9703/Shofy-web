@@ -7,6 +7,7 @@ import {
 } from 'chart.js';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import api from '../config/api';
+import Clock from '../components/Clock';
 
 ChartJS.register(
   CategoryScale, LinearScale, BarElement,
@@ -40,7 +41,7 @@ const CARD_CONFIGS = [
   { key: 'completedOrders',label: 'Completed Orders', icon: '✅', color: '#34d399', gradient: 'rgba(52,211,153,0.12)' },
 ];
 
-const StatCard = ({ label, value, icon, color, gradient, isMoney, delay = 0 }) => {
+const StatCard = memo(({ label, value, icon, color, gradient, isMoney, delay = 0 }) => {
   const num = parseFloat(String(value).replace(/[^0-9.]/g, '')) || 0;
   const animated = useCountUp(num);
   const display = isMoney
@@ -82,7 +83,7 @@ const StatCard = ({ label, value, icon, color, gradient, isMoney, delay = 0 }) =
       </div>
     </div>
   );
-};
+});
 
 const chartDefaults = {
   responsive: true,
@@ -125,12 +126,6 @@ const DashboardPage = () => {
   const [revenueChart, setRevenueChart] = useState({ labels: [], values: [] });
   const [statusChart, setStatusChart] = useState({ labels: [], values: [] });
   const [loading, setLoading] = useState(true);
-  const [now, setNow] = useState(new Date());
-
-  useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 60000);
-    return () => clearInterval(t);
-  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -180,7 +175,7 @@ const DashboardPage = () => {
     load();
   }, []);
 
-  const barData = {
+  const barData = React.useMemo(() => ({
     labels: orderChart.labels,
     datasets: [{
       label: 'Orders',
@@ -190,9 +185,9 @@ const DashboardPage = () => {
       borderRadius: 8,
       borderSkipped: false,
     }],
-  };
+  }), [orderChart]);
 
-  const lineData = {
+  const lineData = React.useMemo(() => ({
     labels: revenueChart.labels,
     datasets: [{
       label: 'Revenue (PKR)',
@@ -207,9 +202,9 @@ const DashboardPage = () => {
       tension: 0.4,
       fill: true,
     }],
-  };
+  }), [revenueChart]);
 
-  const doughnutData = {
+  const doughnutData = React.useMemo(() => ({
     labels: statusChart.labels,
     datasets: [{
       data: statusChart.values,
@@ -218,7 +213,7 @@ const DashboardPage = () => {
       borderWidth: 0,
       borderRadius: 4,
     }],
-  };
+  }), [statusChart]);
 
   const doughnutOptions = {
     responsive: true,
@@ -260,15 +255,7 @@ const DashboardPage = () => {
             Welcome back — here's what's happening today
           </p>
         </div>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '8px 16px', borderRadius: 10,
-          background: 'var(--card)', border: '1px solid var(--border)',
-          fontSize: '0.8rem', color: 'var(--text-2)',
-        }}>
-          <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 6px rgba(16,185,129,0.8)', flexShrink: 0 }} />
-          Live · {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </div>
+        <Clock />
       </div>
 
       {/* Stat cards */}

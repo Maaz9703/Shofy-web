@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import { useDebounce } from '../hooks/useDebounce';
 
 const statusOptions = [
   'Pending - Cash on Delivery',
@@ -18,6 +19,7 @@ const OrdersPage = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [dateFilter, setDateFilter] = useState('');
+  const debouncedSearch = useDebounce(search, 400);
 
   const fetchOrders = async () => {
     try {
@@ -59,7 +61,7 @@ const OrdersPage = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [search, statusFilter, dateFilter]);
+  }, [debouncedSearch, statusFilter, dateFilter]);
 
   const updateStatus = async (orderId, status) => {
     try {
@@ -203,90 +205,24 @@ const OrdersPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {orders.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} style={{ ...tdStyle, textAlign: 'center', padding: 40 }}>
-                      No orders found
-                    </td>
-                  </tr>
-                ) : (
-                  orders.map((o) => (
-                    <tr key={o._id} style={{ borderBottom: '1px solid #334155' }}>
-                      <td style={tdStyle}>
-                        <code style={{ fontFamily: 'monospace', fontSize: 12 }}>
-                          #{o._id?.slice(-8).toUpperCase()}
-                        </code>
-                      </td>
-                      <td style={tdStyle}>
-                        {o.user?.name || '-'}
-                        <br />
-                        <span style={{ fontSize: 12, color: '#64748b' }}>{o.user?.email}</span>
-                      </td>
-                      <td style={tdStyle}>
-                        <strong>PKR {o.total?.toFixed(2)}</strong>
-                      </td>
-                      <td style={tdStyle}>{o.paymentMethod || '-'}</td>
-                      <td style={tdStyle}>
-                        <span
-                          style={{
-                            padding: '4px 10px',
-                            borderRadius: 20,
-                            fontSize: 12,
-                            fontWeight: 600,
-                            background: getStatusColor(o.status) + '33',
-                            color: getStatusColor(o.status),
-                          }}
-                        >
-                          {o.status}
-                        </span>
-                      </td>
-                      <td style={tdStyle}>
-                        <div style={{ fontSize: 12 }}>
-                          {new Date(o.createdAt).toLocaleDateString()}
-                          <br />
-                          <span style={{ color: '#64748b' }}>
-                            {new Date(o.createdAt).toLocaleTimeString()}
-                          </span>
-                        </div>
-                      </td>
-                      <td style={tdStyle}>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          <button
-                            onClick={() => setSelectedOrder(o)}
-                            style={{ ...btnStyle, background: '#334155', fontSize: 12 }}
-                          >
-                            View
-                          </button>
-                          <select
-                            value={o.status}
-                            onChange={(e) => updateStatus(o._id, e.target.value)}
-                            style={{
-                              padding: '6px 10px',
-                              borderRadius: 6,
-                              background: '#0f172a',
-                              color: '#fff',
-                              border: '1px solid #334155',
-                              fontSize: 12,
-                              cursor: 'pointer',
-                            }}
-                          >
-                            {statusOptions.map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            onClick={() => deleteOrder(o._id)}
-                            style={{ ...btnStyle, background: '#ef4444', fontSize: 12 }}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
+              {orders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ ...tdStyle, textAlign: 'center', padding: 40 }}>
+                    No orders found
+                  </td>
+                </tr>
+              ) : (
+                orders.map((o) => (
+                  <OrderRow
+                    key={o._id}
+                    order={o}
+                    onView={() => setSelectedOrder(o)}
+                    onUpdateStatus={(status) => updateStatus(o._id, status)}
+                    onDelete={() => deleteOrder(o._id)}
+                    getStatusColor={getStatusColor}
+                  />
+                ))
+              )}
               </tbody>
             </table>
           </div>
@@ -419,5 +355,82 @@ const inputStyle = {
   color: '#fff',
   marginBottom: 0,
 };
+
+const OrderRow = memo(({ order, onView, onUpdateStatus, onDelete, getStatusColor }) => (
+  <tr style={{ borderBottom: '1px solid #334155' }}>
+    <td style={tdStyle}>
+      <code style={{ fontFamily: 'monospace', fontSize: 12 }}>
+        #{order._id?.slice(-8).toUpperCase()}
+      </code>
+    </td>
+    <td style={tdStyle}>
+      {order.user?.name || '-'}
+      <br />
+      <span style={{ fontSize: 12, color: '#64748b' }}>{order.user?.email}</span>
+    </td>
+    <td style={tdStyle}>
+      <strong>PKR {order.total?.toFixed(2)}</strong>
+    </td>
+    <td style={tdStyle}>{order.paymentMethod || '-'}</td>
+    <td style={tdStyle}>
+      <span
+        style={{
+          padding: '4px 10px',
+          borderRadius: 20,
+          fontSize: 12,
+          fontWeight: 600,
+          background: getStatusColor(order.status) + '33',
+          color: getStatusColor(order.status),
+        }}
+      >
+        {order.status}
+      </span>
+    </td>
+    <td style={tdStyle}>
+      <div style={{ fontSize: 12 }}>
+        {new Date(order.createdAt).toLocaleDateString()}
+        <br />
+        <span style={{ color: '#64748b' }}>
+          {new Date(order.createdAt).toLocaleTimeString()}
+        </span>
+      </div>
+    </td>
+    <td style={tdStyle}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <button
+          onClick={onView}
+          style={{ ...btnStyle, background: '#334155', fontSize: 12 }}
+        >
+          View
+        </button>
+        <select
+          value={order.status}
+          onChange={(e) => onUpdateStatus(e.target.value)}
+          style={{
+            padding: '6px 10px',
+            borderRadius: 6,
+            background: '#0f172a',
+            color: '#fff',
+            border: '1px solid #334155',
+            fontSize: 12,
+            cursor: 'pointer',
+          }}
+        >
+          {['Pending - Cash on Delivery', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={onDelete}
+          style={{ ...btnStyle, background: '#ef4444', fontSize: 12 }}
+        >
+          Delete
+        </button>
+      </div>
+    </td>
+  </tr>
+));
 
 export default OrdersPage;

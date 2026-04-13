@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback } from 'react';
 import api from '../config/api';
 import toast from 'react-hot-toast';
+import { useDebounce } from '../hooks/useDebounce';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
@@ -14,6 +15,7 @@ const ProductsPage = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [sortBy, setSortBy] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
+  const debouncedSearch = useDebounce(search, 400);
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -77,7 +79,7 @@ const ProductsPage = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [search, selectedCategory, sortBy, sortOrder]);
+  }, [debouncedSearch, selectedCategory, sortBy, sortOrder]);
 
   const openModal = (product = null) => {
     if (product) {
@@ -491,49 +493,14 @@ const ProductsPage = () => {
                 </tr>
               ) : (
                 products.map((p) => (
-                <tr 
-                  key={p._id} 
-                  style={{ 
-                    borderBottom: '1px solid #334155',
-                    background: selectedProducts.includes(p._id) ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
-                  }}
-                >
-                  <td style={tdStyle}>
-                    <input
-                      type="checkbox"
-                      checked={selectedProducts.includes(p._id)}
-                      onChange={() => toggleProductSelection(p._id)}
-                      style={{ cursor: 'pointer' }}
-                    />
-                  </td>
-                  <td style={tdStyle}>
-                    <img
-                      src={p.image || 'https://via.placeholder.com/60'}
-                      alt=""
-                      style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 8 }}
-                    />
-                  </td>
-                  <td style={tdStyle}>{p.title}</td>
-                  <td style={tdStyle}>{p.category}</td>
-                  <td style={tdStyle}>PKR {p.price?.toFixed(2)}</td>
-                  <td style={tdStyle}>{p.stock}</td>
-                  <td style={{ ...tdStyle, fontSize: 13, color: '#94a3b8' }}>
-                    {p.quantityDiscounts?.length > 0
-                      ? p.quantityDiscounts.map((t) => `${t.discountPercent}% @ ≥${t.minQty}`).join(', ')
-                      : '—'}
-                  </td>
-                  <td style={tdStyle}>
-                    <button
-                      onClick={() => openModal(p)}
-                      style={{ ...btnStyle, background: '#334155', marginRight: 8 }}
-                    >
-                      Edit
-                    </button>
-                    <button onClick={() => handleDelete(p._id)} style={{ ...btnStyle, background: '#dc2626' }}>
-                      Delete
-                    </button>
-                  </td>
-                </tr>
+                  <ProductRow
+                    key={p._id}
+                    product={p}
+                    isSelected={selectedProducts.includes(p._id)}
+                    onToggle={() => toggleProductSelection(p._id)}
+                    onEdit={() => openModal(p)}
+                    onDelete={() => handleDelete(p._id)}
+                  />
                 ))
               )}
             </tbody>
@@ -711,5 +678,50 @@ const sortButtonStyle = {
   padding: 0,
   fontSize: 14,
 };
+
+const ProductRow = memo(({ product, isSelected, onToggle, onEdit, onDelete }) => (
+  <tr 
+    style={{ 
+      borderBottom: '1px solid #334155',
+      background: isSelected ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+    }}
+  >
+    <td style={tdStyle}>
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={onToggle}
+        style={{ cursor: 'pointer' }}
+      />
+    </td>
+    <td style={tdStyle}>
+      <img
+        src={product.image || 'https://via.placeholder.com/60'}
+        alt=""
+        style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 8 }}
+      />
+    </td>
+    <td style={tdStyle}>{product.title}</td>
+    <td style={tdStyle}>{product.category}</td>
+    <td style={tdStyle}>PKR {product.price?.toFixed(2)}</td>
+    <td style={tdStyle}>{product.stock}</td>
+    <td style={{ ...tdStyle, fontSize: 13, color: '#94a3b8' }}>
+      {product.quantityDiscounts?.length > 0
+        ? product.quantityDiscounts.map((t) => `${t.discountPercent}% @ ≥${t.minQty}`).join(', ')
+        : '—'}
+    </td>
+    <td style={tdStyle}>
+      <button
+        onClick={onEdit}
+        style={{ ...btnStyle, background: '#334155', marginRight: 8 }}
+      >
+        Edit
+      </button>
+      <button onClick={onDelete} style={{ ...btnStyle, background: '#dc2626' }}>
+        Delete
+      </button>
+    </td>
+  </tr>
+));
 
 export default ProductsPage;
