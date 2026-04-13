@@ -71,6 +71,17 @@ const OrdersPage = () => {
     }
   };
 
+  const deleteOrder = async (orderId) => {
+    if (!window.confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+    try {
+      await api.delete(`/orders/${orderId}`);
+      toast.success('Order deleted');
+      fetchOrders();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete');
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'Delivered':
@@ -265,6 +276,12 @@ const OrdersPage = () => {
                               </option>
                             ))}
                           </select>
+                          <button
+                            onClick={() => deleteOrder(o._id)}
+                            style={{ ...btnStyle, background: '#ef4444', fontSize: 12 }}
+                          >
+                            Delete
+                          </button>
                         </div>
                       </td>
                     </tr>

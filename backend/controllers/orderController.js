@@ -166,10 +166,32 @@ const updateOrderStatus = async (req, res, next) => {
   }
 };
 
+/**
+ * @desc    Delete order (Admin)
+ * @route   DELETE /api/orders/:id
+ * @access  Private/Admin
+ */
+const deleteOrder = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    await order.deleteOne();
+
+    res.json({ success: true, message: 'Order removed' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   getMyOrders,
   getOrder,
   getAllOrders,
   updateOrderStatus,
+  deleteOrder,
 };
