@@ -28,6 +28,19 @@ export default function CartPage() {
                         </Link>
                         <div style={{ flex: 1, minWidth: 0 }}>
                             <Link to={`/product/${item.product._id}`} style={{ fontWeight: 600, color: 'var(--text)' }}>{item.product.title}</Link>
+                            {item.color && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                                    <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Color:</span>
+                                    <div style={{ width: 14, height: 14, borderRadius: '50%', background: item.color, border: '1px solid var(--border)' }} />
+                                    <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{item.color}</span>
+                                </div>
+                            )}
+                            {item.note && (
+                                <div style={{ marginTop: 4, padding: '4px 8px', background: 'var(--background)', borderRadius: 4, borderLeft: '3px solid var(--primary)', fontSize: '0.8rem' }}>
+                                    <span style={{ color: 'var(--text-muted)', marginRight: 4 }}>Note:</span>
+                                    <span style={{ color: 'var(--text)' }}>{item.note}</span>
+                                </div>
+                            )}
                             {(() => {
                                 const { unitPrice, hasDiscount, discountPercent } = getQuantityDiscount(item.product, item.quantity);
                                 return (
@@ -43,11 +56,11 @@ export default function CartPage() {
                                 min={1}
                                 max={item.product.stock || 999}
                                 value={item.quantity}
-                                onChange={(e) => updateQuantity(item.product._id, Math.max(1, parseInt(e.target.value, 10) || 1))}
+                                onChange={(e) => updateQuantity(item.product._id, item.color, item.note, Math.max(1, parseInt(e.target.value, 10) || 1))}
                                 className="input"
                                 style={{ width: 64, textAlign: 'center' }}
                             />
-                            <button type="button" className="btn btn-ghost" style={{ color: 'var(--error)' }} onClick={() => removeFromCart(item.product._id)}>Remove</button>
+                            <button type="button" className="btn btn-ghost" style={{ color: 'var(--error)' }} onClick={() => removeFromCart(item.product._id, item.color, item.note)}>Remove</button>
                         </div>
                         <div style={{ fontWeight: 600 }}>PKR {getQuantityDiscount(item.product, item.quantity).totalPrice.toFixed(2)}</div>
                     </div>

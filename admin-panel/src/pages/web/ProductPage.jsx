@@ -15,13 +15,19 @@ export default function ProductPage() {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(1);
+    const [selectedColor, setSelectedColor] = useState(null);
+    const [note, setNote] = useState('');
 
     useEffect(() => {
         if (!id) return;
         setLoading(true);
         api
             .get(`/products/${id}`)
-            .then((res) => setProduct(res.data.data))
+            .then((res) => {
+                const p = res.data.data;
+                setProduct(p);
+                if (p?.colors?.length > 0) setSelectedColor(p.colors[0]);
+            })
             .catch(() => setProduct(null))
             .finally(() => setLoading(false));
     }, [id]);
@@ -51,8 +57,13 @@ export default function ProductPage() {
             toast.error('Insufficient stock');
             return;
         }
-        addToCart(product, quantity);
+        if (product.colors?.length > 0 && !selectedColor) {
+            toast.error('Please select a color');
+            return;
+        }
+        addToCart(product, quantity, selectedColor, note);
         toast.success('Added to cart');
+        setNote('');
     };
 
     if (loading || !product) {
@@ -140,7 +151,53 @@ export default function ProductPage() {
                             </>
                         );
                     })()}
+                    
+                    {product.colors && product.colors.length > 0 && (
+                        <div style={{ marginBottom: 24 }}>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 12 }}>Select Color: <span style={{ color: 'var(--text)', fontWeight: 600 }}>{selectedColor}</span></div>
+                            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                                {product.colors.map((color) => (
+                                    <button
+                                        key={color}
+                                        type="button"
+                                        onClick={() => setSelectedColor(color)}
+                                        style={{
+                                            width: 36,
+                                            height: 36,
+                                            borderRadius: '50%',
+                                            background: color,
+                                            border: selectedColor === color ? '2px solid var(--primary)' : '1px solid var(--border)',
+                                            padding: 0,
+                                            cursor: 'pointer',
+                                            boxShadow: selectedColor === color ? '0 0 0 2px var(--background), 0 0 0 4px var(--primary)' : 'none',
+                                            transition: 'all 0.2s ease'
+                                        }}
+                                        title={color}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     <p style={{ color: 'var(--text-muted)', marginBottom: 24 }}>{product.description || 'No description.'}</p>
+                    
+                    {product.details && (
+                        <div style={{ marginBottom: 24, padding: 16, background: 'var(--card)', borderRadius: 12, border: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: '0.875rem', fontWeight: 700, marginBottom: 8, color: 'var(--primary)' }}>Additional Details</div>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', whiteSpace: 'pre-line' }}>{product.details}</div>
+                        </div>
+                    )}
+
+                    <div style={{ marginBottom: 24 }}>
+                        <label style={{ display: 'block', fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: 8 }}>Got a special detail or request? (Optional)</label>
+                        <textarea
+                            className="input"
+                            placeholder="e.g. Size details, gift message, or any other instruction..."
+                            value={note}
+                            onChange={(e) => setNote(e.target.value)}
+                            style={{ minHeight: 80, resize: 'vertical' }}
+                        />
+                    </div>
                     <div style={{ marginBottom: 24 }}>
                         <span style={{ color: 'var(--text-muted)' }}>Stock: </span>
                         <span style={{ color: product.stock > 10 ? 'var(--success)' : product.stock > 0 ? '#f59e0b' : 'var(--error)' }}>{product.stock > 0 ? product.stock : 'Out of stock'}</span>

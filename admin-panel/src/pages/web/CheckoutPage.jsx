@@ -61,7 +61,7 @@ export default function CheckoutPage() {
         setPlacing(true);
         try {
             const orderData = {
-                items: cartItems.map((i) => ({ product: i.product._id, quantity: i.quantity })),
+                items: cartItems.map((i) => ({ product: i.product._id, quantity: i.quantity, color: i.color, note: i.note })),
                 shippingAddress: {
                     fullName: selectedAddress.fullName,
                     address: selectedAddress.address,

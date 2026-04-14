@@ -50,9 +50,24 @@ export default function OrderDetailPage() {
             <div className="card" style={{ padding: 24, marginBottom: 24 }}>
                 <h3 style={{ marginBottom: 12 }}>Items</h3>
                 {(order.items || []).map((item) => (
-                    <div key={item._id || item.product?._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                        <span>{item.product?.title || 'Product'} × {item.quantity}</span>
-                        <span>PKR {Number(item.price || item.product?.price || 0) * (item.quantity || 0)}</span>
+                    <div key={item._id || item.product?._id} style={{ display: 'flex', flexDirection: 'column', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>{item.product?.title || 'Product'} × {item.quantity}</span>
+                            <span>PKR {Number(item.price || item.product?.price || 0) * (item.quantity || 0)}</span>
+                        </div>
+                        {item.color && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Color:</span>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.color, border: '1px solid var(--border)' }} />
+                                <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{item.color}</span>
+                            </div>
+                        )}
+                        {item.note && (
+                            <div style={{ marginTop: 4, padding: '4px 8px', background: 'var(--background)', borderRadius: 4, borderLeft: '3px solid var(--primary)', fontSize: '0.7rem' }}>
+                                <span style={{ color: 'var(--text-muted)' }}>Note: </span>
+                                <span style={{ color: 'var(--text)' }}>{item.note}</span>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

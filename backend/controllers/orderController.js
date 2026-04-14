@@ -38,6 +38,8 @@ const createOrder = async (req, res, next) => {
         title: product.title,
         quantity: item.quantity,
         price: product.price,
+        color: item.color,
+        note: item.note,
       });
     }
 

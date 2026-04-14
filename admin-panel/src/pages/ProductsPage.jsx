@@ -24,6 +24,8 @@ const ProductsPage = () => {
     stock: '',
     category: '',
     quantityDiscounts: [{ minQty: '', discountPercent: '' }],
+    colors: [''],
+    details: '',
   });
 
   const fetchCategories = async () => {
@@ -95,10 +97,12 @@ const ProductsPage = () => {
         stock: String(product.stock),
         category: product.category,
         quantityDiscounts: tiers,
+        colors: product.colors && product.colors.length > 0 ? product.colors : [''],
+        details: product.details || '',
       });
     } else {
       setEditingProduct(null);
-      setForm({ title: '', description: '', price: '', image: '', stock: '', category: '', quantityDiscounts: [{ minQty: '', discountPercent: '' }] });
+      setForm({ title: '', description: '', price: '', image: '', stock: '', category: '', quantityDiscounts: [{ minQty: '', discountPercent: '' }], colors: [''], details: '' });
     }
     setModalOpen(true);
   };
@@ -119,6 +123,18 @@ const ProductsPage = () => {
       ...f,
       quantityDiscounts: f.quantityDiscounts.map((t, i) => (i === index ? { ...t, [field]: value } : t)),
     }));
+  };
+
+  const addColor = () => {
+    setForm((f) => ({ ...f, colors: [...(f.colors || []), ''] }));
+  };
+
+  const removeColor = (index) => {
+    setForm((f) => ({ ...f, colors: f.colors.filter((_, i) => i !== index) }));
+  };
+
+  const updateColor = (index, value) => {
+    setForm((f) => ({ ...f, colors: f.colors.map((c, i) => (i === index ? value : c)) }));
   };
 
   const closeModal = () => {
@@ -143,6 +159,8 @@ const ProductsPage = () => {
       image: form.image || undefined,
       category: form.category,
       quantityDiscounts: quantityDiscounts.length > 0 ? quantityDiscounts.map((t) => ({ ...t, discountPercent: Math.min(100, Math.max(0, t.discountPercent)) })) : undefined,
+      colors: (form.colors || []).map(c => c.trim()).filter(c => c),
+      details: form.details || undefined,
     };
     if (!data.title || !data.description || isNaN(data.price) || isNaN(data.stock) || !data.category) {
       toast.error('Please fill required fields');
@@ -549,6 +567,14 @@ const ProductsPage = () => {
                 rows={3}
                 style={{ ...inputStyle, minHeight: 80 }}
               />
+              <label style={labelStyle}>Additional Details (Optional)</label>
+              <textarea
+                value={form.details}
+                onChange={(e) => setForm((f) => ({ ...f, details: e.target.value }))}
+                placeholder="Key features, specs, or other details..."
+                rows={3}
+                style={{ ...inputStyle, minHeight: 80 }}
+              />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div>
                   <label style={labelStyle}>Price</label>
@@ -631,6 +657,42 @@ const ProductsPage = () => {
                   + Add another quantity tier
                 </button>
                 <p style={{ color: '#64748b', fontSize: 12, marginTop: 8 }}>e.g. 5% off when buying 2+, 10% off when buying 5+</p>
+              </div>
+
+              <div style={{ marginBottom: 16, padding: '12px 0', borderBottom: '1px solid #334155' }}>
+                <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 10 }}>Product Colors (Hex codes or names)</div>
+                {(form.colors || ['']).map((color, index) => (
+                  <div key={index} style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 12 }}>
+                    <div style={{ flex: 1, position: 'relative' }}>
+                      <input
+                        type="text"
+                        value={color}
+                        onChange={(e) => updateColor(index, e.target.value)}
+                        placeholder="e.g. #FF0000 or Red"
+                        style={{ ...inputStyle, marginBottom: 0, paddingLeft: 44 }}
+                      />
+                      <div 
+                        style={{ 
+                          position: 'absolute', 
+                          left: 12, 
+                          top: '50%', 
+                          transform: 'translateY(-50%)',
+                          width: 20, 
+                          height: 20, 
+                          borderRadius: '50%', 
+                          background: color || 'transparent',
+                          border: '1px solid #334155'
+                        }} 
+                      />
+                    </div>
+                    <button type="button" onClick={() => removeColor(index)} style={{ ...btnStyle, background: '#475569', padding: '10px 14px' }} title="Remove color">
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={addColor} style={{ ...btnStyle, background: '#334155', padding: '8px 14px', fontSize: 13 }}>
+                  + Add another color
+                </button>
               </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
                 <button type="submit" style={{ ...btnStyle, flex: 1, background: '#6366f1' }}>

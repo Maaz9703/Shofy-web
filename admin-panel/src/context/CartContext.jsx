@@ -30,29 +30,36 @@ export const CartProvider = ({ children }) => {
         saveCart(cartItems);
     }, [cartItems]);
 
-    const addToCart = (product, quantity = 1) => {
+    const addToCart = (product, quantity = 1, color = null, note = '') => {
         setCartItems((prev) => {
-            const existing = prev.find((i) => i.product._id === product._id);
-            if (existing) {
-                return prev.map((i) =>
-                    i.product._id === product._id
-                        ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock || 999) }
-                        : i
-                );
+            const existingIndex = prev.findIndex(
+                (i) => i.product._id === product._id && i.color === color && i.note === note
+            );
+            if (existingIndex > -1) {
+                const updated = [...prev];
+                updated[existingIndex] = {
+                    ...updated[existingIndex],
+                    quantity: Math.min(updated[existingIndex].quantity + quantity, product.stock || 999),
+                };
+                return updated;
             }
-            return [...prev, { product, quantity }];
+            return [...prev, { product, quantity, color, note }];
         });
     };
 
-    const updateQuantity = (productId, quantity) => {
-        if (quantity < 1) return removeFromCart(productId);
+    const updateQuantity = (productId, color, note, quantity) => {
+        if (quantity < 1) return removeFromCart(productId, color, note);
         setCartItems((prev) =>
-            prev.map((i) => (i.product._id === productId ? { ...i, quantity } : i))
+            prev.map((i) =>
+                i.product._id === productId && i.color === color && i.note === note ? { ...i, quantity } : i
+            )
         );
     };
 
-    const removeFromCart = (productId) => {
-        setCartItems((prev) => prev.filter((i) => i.product._id !== productId));
+    const removeFromCart = (productId, color, note) => {
+        setCartItems((prev) =>
+            prev.filter((i) => !(i.product._id === productId && i.color === color && i.note === note))
+        );
     };
 
     const clearCart = () => setCartItems([]);
