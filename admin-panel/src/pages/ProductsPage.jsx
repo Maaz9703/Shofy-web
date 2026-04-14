@@ -544,10 +544,14 @@ const ProductsPage = () => {
             onClick={(e) => e.stopPropagation()}
             style={{
               background: '#1e293b',
-              padding: 24,
+              padding: '24px 32px',
               borderRadius: 16,
               width: '100%',
-              maxWidth: 480,
+              maxWidth: 520,
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              border: '1px solid rgba(255,255,255,0.05)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
             }}
           >
             <h2 style={{ marginBottom: 20 }}>{editingProduct ? 'Edit Product' : 'Add Product'}</h2>
