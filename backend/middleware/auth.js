@@ -29,4 +29,27 @@ const protect = async (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+/**
+ * Optional protect - check for JWT token but don't fail if missing
+ */
+const optionalProtect = async (req, res, next) => {
+  let token;
+
+  if (req.headers.authorization?.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password');
+    } catch (error) {
+      // Just continue without user if token is invalid
+    }
+  }
+
+  next();
+};
+
+module.exports = { protect, optionalProtect };
+

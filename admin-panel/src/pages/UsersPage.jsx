@@ -60,6 +60,21 @@ const UsersPage = () => {
     fetchUsers();
   }, [debouncedSearch, filterRole, sortBy, sortOrder]);
 
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      await api.put(`/users/${userId}/role`, { role: newRole });
+      toast.success('User role updated');
+      setUsers((prev) =>
+        prev.map((u) => (u._id === userId ? { ...u, role: newRole } : u))
+      );
+      if (selectedUser?._id === userId) {
+        setSelectedUser({ ...selectedUser, role: newRole });
+      }
+    } catch (err) {
+      toast.error('Failed to update role');
+    }
+  };
+
   const handleSort = (field) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -72,6 +87,7 @@ const UsersPage = () => {
   const getRoleBadge = (role) => {
     const colors = {
       admin: '#dc2626',
+      shopkeeper: '#10b981',
       user: '#6366f1',
     };
     return (
@@ -81,8 +97,8 @@ const UsersPage = () => {
           borderRadius: 20,
           fontSize: 12,
           fontWeight: 600,
-          background: colors[role] + '33',
-          color: colors[role],
+          background: (colors[role] || '#64748b') + '33',
+          color: colors[role] || '#64748b',
         }}
       >
         {role?.toUpperCase()}
@@ -258,7 +274,18 @@ const UsersPage = () => {
               </div>
               <div>
                 <label style={labelStyle}>Role</label>
-                <div style={{ marginTop: 8 }}>{getRoleBadge(selectedUser.role)}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
+                  <select
+                    value={selectedUser.role}
+                    onChange={(e) => handleRoleChange(selectedUser._id, e.target.value)}
+                    style={{ ...inputStyle, marginBottom: 0, padding: '8px 12px', flex: 1 }}
+                  >
+                    <option value="user">User</option>
+                    <option value="shopkeeper">Shopkeeper</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                  {getRoleBadge(selectedUser.role)}
+                </div>
               </div>
               <div>
                 <label style={labelStyle}>Joined</label>

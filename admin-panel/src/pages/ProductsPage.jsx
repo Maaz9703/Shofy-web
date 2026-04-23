@@ -20,6 +20,7 @@ const ProductsPage = () => {
     title: '',
     description: '',
     price: '',
+    shopkeeperPrice: '',
     image: '',
     stock: '',
     category: '',
@@ -93,6 +94,7 @@ const ProductsPage = () => {
         title: product.title,
         description: product.description,
         price: String(product.price),
+        shopkeeperPrice: product.shopkeeperPrice ? String(product.shopkeeperPrice) : '',
         image: product.image || '',
         stock: String(product.stock),
         category: product.category,
@@ -102,7 +104,7 @@ const ProductsPage = () => {
       });
     } else {
       setEditingProduct(null);
-      setForm({ title: '', description: '', price: '', image: '', stock: '', category: '', quantityDiscounts: [{ minQty: '', discountPercent: '' }], colors: [''], details: '' });
+      setForm({ title: '', description: '', price: '', shopkeeperPrice: '', image: '', stock: '', category: '', quantityDiscounts: [{ minQty: '', discountPercent: '' }], colors: [''], details: '' });
     }
     setModalOpen(true);
   };
@@ -155,6 +157,7 @@ const ProductsPage = () => {
       title: form.title,
       description: form.description,
       price: parseFloat(form.price),
+      shopkeeperPrice: form.shopkeeperPrice ? parseFloat(form.shopkeeperPrice) : undefined,
       stock: parseInt(form.stock, 10),
       image: form.image || undefined,
       category: form.category,
@@ -591,6 +594,19 @@ const ProductsPage = () => {
                     style={inputStyle}
                   />
                 </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Shopkeeper Price (Wholesale Rate)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={form.shopkeeperPrice}
+                  onChange={(e) => setForm((f) => ({ ...f, shopkeeperPrice: e.target.value }))}
+                  placeholder="Special rate for shopkeepers..."
+                  style={inputStyle}
+                />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div>
                   <label style={labelStyle}>Stock</label>
                   <input

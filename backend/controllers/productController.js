@@ -35,13 +35,21 @@ const getProducts = async (req, res, next) => {
       Product.countDocuments(query)
     ]);
 
+    // Adjust prices for shopkeeper
+    const adjustedProducts = products.map(product => {
+      if (req.user && req.user.role === 'shopkeeper' && product.shopkeeperPrice) {
+        return { ...product, displayPrice: product.shopkeeperPrice, isWholesale: true };
+      }
+      return { ...product, displayPrice: product.price, isWholesale: false };
+    });
+
     res.json({ 
       success: true, 
       count: products.length, 
       total,
       page: parseInt(page, 10),
       pages: Math.ceil(total / parsedLimit),
-      data: products 
+      data: adjustedProducts 
     });
   } catch (error) {
     next(error);
@@ -61,7 +69,17 @@ const getProduct = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    res.json({ success: true, data: product });
+    // Adjust price for shopkeeper
+    const adjustedProduct = { ...product };
+    if (req.user && req.user.role === 'shopkeeper' && product.shopkeeperPrice) {
+      adjustedProduct.displayPrice = product.shopkeeperPrice;
+      adjustedProduct.isWholesale = true;
+    } else {
+      adjustedProduct.displayPrice = product.price;
+      adjustedProduct.isWholesale = false;
+    }
+
+    res.json({ success: true, data: adjustedProduct });
   } catch (error) {
     next(error);
   }

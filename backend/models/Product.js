@@ -16,6 +16,10 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Please add a price'],
       min: 0,
     },
+    shopkeeperPrice: {
+      type: Number,
+      min: 0,
+    },
     image: {
       type: String,
       default: 'https://via.placeholder.com/300',
