@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -39,7 +39,7 @@ jobs:
 
       - name: Build APK (Gradle)
         working-directory: ./mobile-app/android
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease --stacktrace --info
 
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v1
