@@ -17,6 +17,12 @@ const settingsSchema = new mongoose.Schema(
       lowStock: { type: Boolean, default: true },
       dailyReport: { type: Boolean, default: false },
     },
+    dailyOffer: {
+      title: { type: String, default: '' },
+      message: { type: String, default: '' },
+      image: { type: String, default: '' },
+      isActive: { type: Boolean, default: false },
+    },
   },
   { timestamps: true }
 );

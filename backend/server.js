@@ -44,6 +44,7 @@ const addressRoutes = require('./routes/addresses');
 const wishlistRoutes = require('./routes/wishlist');
 const couponRoutes = require('./routes/coupons');
 const settingsRoutes = require('./routes/settings');
+const notificationRoutes = require('./routes/notifications');
 
 // Mount routers
 app.use('/api/auth', authRoutes);
@@ -55,6 +56,7 @@ app.use('/api/addresses', addressRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Global error handler - must be last
 const errorHandler = require('./middleware/error');
