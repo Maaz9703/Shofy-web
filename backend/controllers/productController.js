@@ -14,8 +14,12 @@ const getProducts = async (req, res, next) => {
     let query = {};
 
     if (search) {
-      // Use text index for performant searching
-      query.$text = { $search: search };
+      // Use regex for partial, case-insensitive matching
+      const searchRegex = new RegExp(search, 'i');
+      query.$or = [
+        { title: searchRegex },
+        { description: searchRegex }
+      ];
     }
 
     if (category) {
