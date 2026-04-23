@@ -4,7 +4,8 @@ const {
   broadcastNotification,
   markAsRead
 } = require('../controllers/notificationController');
-const { protect, admin } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/auth');
+const admin = require('../middleware/admin');
 
 const router = express.Router();
 
