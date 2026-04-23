@@ -14,8 +14,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0
+
+      - name: Clone Mobile App Repository
+        run: |
+          rm -rf mobile-app
+          git clone https://github.com/Maaz9703/Shofy-mobile-app.git mobile-app
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
