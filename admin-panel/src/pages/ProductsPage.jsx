@@ -503,7 +503,6 @@ const ProductsPage = () => {
                   </button>
                 </th>
                 <th style={thStyle}>Qty discount</th>
-                <th style={thStyle}>Flavors</th>
                 <th style={thStyle}>Actions</th>
               </tr>
             </thead>
@@ -845,11 +844,6 @@ const ProductRow = memo(({ product, isSelected, onToggle, onEdit, onDelete }) =>
     <td style={{ ...tdStyle, fontSize: 13, color: '#94a3b8' }}>
       {product.quantityDiscounts?.length > 0
         ? product.quantityDiscounts.map((t) => `${t.discountPercent}% @ ≥${t.minQty}`).join(', ')
-        : '—'}
-    </td>
-    <td style={{ ...tdStyle, fontSize: 13, color: '#94a3b8' }}>
-      {product.flavors?.length > 0
-        ? product.flavors.map(fl => `${fl.name} (${fl.stock})`).join(', ')
         : '—'}
     </td>
     <td style={tdStyle}>
