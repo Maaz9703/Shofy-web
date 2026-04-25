@@ -26,6 +26,7 @@ const ProductsPage = () => {
     category: '',
     quantityDiscounts: [{ minQty: '', discountPercent: '' }],
     colors: [''],
+    flavors: [{ name: '', stock: '' }],
     details: '',
   });
 
@@ -100,11 +101,12 @@ const ProductsPage = () => {
         category: product.category,
         quantityDiscounts: tiers,
         colors: product.colors && product.colors.length > 0 ? product.colors : [''],
+        flavors: product.flavors && product.flavors.length > 0 ? product.flavors : [{ name: '', stock: '' }],
         details: product.details || '',
       });
     } else {
       setEditingProduct(null);
-      setForm({ title: '', description: '', price: '', shopkeeperPrice: '', image: '', stock: '', category: '', quantityDiscounts: [{ minQty: '', discountPercent: '' }], colors: [''], details: '' });
+      setForm({ title: '', description: '', price: '', shopkeeperPrice: '', image: '', stock: '', category: '', quantityDiscounts: [{ minQty: '', discountPercent: '' }], colors: [''], flavors: [{ name: '', stock: '' }], details: '' });
     }
     setModalOpen(true);
   };
@@ -139,6 +141,21 @@ const ProductsPage = () => {
     setForm((f) => ({ ...f, colors: f.colors.map((c, i) => (i === index ? value : c)) }));
   };
 
+  const addFlavor = () => {
+    setForm((f) => ({ ...f, flavors: [...(f.flavors || []), { name: '', stock: '' }] }));
+  };
+
+  const removeFlavor = (index) => {
+    setForm((f) => ({ ...f, flavors: f.flavors.filter((_, i) => i !== index) }));
+  };
+
+  const updateFlavor = (index, field, value) => {
+    setForm((f) => ({
+      ...f,
+      flavors: f.flavors.map((fl, i) => (i === index ? { ...fl, [field]: value } : fl)),
+    }));
+  };
+
   const closeModal = () => {
     setModalOpen(false);
     setEditingProduct(null);
@@ -163,6 +180,7 @@ const ProductsPage = () => {
       category: form.category,
       quantityDiscounts: quantityDiscounts.length > 0 ? quantityDiscounts.map((t) => ({ ...t, discountPercent: Math.min(100, Math.max(0, t.discountPercent)) })) : undefined,
       colors: (form.colors || []).map(c => c.trim()).filter(c => c),
+      flavors: (form.flavors || []).map(fl => ({ name: fl.name.trim(), stock: parseInt(fl.stock, 10) || 0 })).filter(fl => fl.name),
       details: form.details || undefined,
     };
     if (!data.title || !data.description || isNaN(data.price) || isNaN(data.stock) || !data.category) {
@@ -713,6 +731,42 @@ const ProductsPage = () => {
                 <button type="button" onClick={addColor} style={{ ...btnStyle, background: '#334155', padding: '8px 14px', fontSize: 13 }}>
                   + Add another color
                 </button>
+              </div>
+
+              <div style={{ marginBottom: 16, padding: '12px 0', borderBottom: '1px solid #334155' }}>
+                <div style={{ color: '#94a3b8', fontSize: 13, marginBottom: 10 }}>Product Flavors & Stock</div>
+                {(form.flavors || [{ name: '', stock: '' }]).map((flavor, index) => (
+                  <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 12, alignItems: 'end', marginBottom: 12 }}>
+                    <div>
+                      <label style={labelStyle}>Flavor Name</label>
+                      <input
+                        type="text"
+                        value={flavor.name}
+                        onChange={(e) => updateFlavor(index, 'name', e.target.value)}
+                        placeholder="e.g. Apple, Anti-dandruff"
+                        style={inputStyle}
+                      />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Stock for this flavor</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={flavor.stock}
+                        onChange={(e) => updateFlavor(index, 'stock', e.target.value)}
+                        placeholder="e.g. 10"
+                        style={inputStyle}
+                      />
+                    </div>
+                    <button type="button" onClick={() => removeFlavor(index)} style={{ ...btnStyle, background: '#475569', padding: '12px 14px', marginBottom: 16 }} title="Remove flavor">
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <button type="button" onClick={addFlavor} style={{ ...btnStyle, background: '#334155', padding: '8px 14px', fontSize: 13 }}>
+                  + Add another flavor
+                </button>
+                <p style={{ color: '#64748b', fontSize: 12, marginTop: 8 }}>Note: Ensure main product stock reflects the total of all flavor stocks if applicable.</p>
               </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
                 <button type="submit" style={{ ...btnStyle, flex: 1, background: '#6366f1' }}>

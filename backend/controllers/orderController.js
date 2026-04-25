@@ -17,6 +17,12 @@ const createOrder = async (req, res, next) => {
     let total = 0;
     const orderItems = [];
 
+    // Group quantities for discounts
+    const productQtyMap = {};
+    for (const item of items) {
+      productQtyMap[item.product] = (productQtyMap[item.product] || 0) + item.quantity;
+    }
+
     for (const item of items) {
       const product = await Product.findById(item.product);
       if (!product) {
@@ -30,15 +36,26 @@ const createOrder = async (req, res, next) => {
         });
       }
 
-      const itemTotal = product.price * item.quantity;
+      let applicableDiscount = 0;
+      const totalQtyForProduct = productQtyMap[item.product];
+      if (product.quantityDiscounts && product.quantityDiscounts.length > 0) {
+        const applicable = product.quantityDiscounts
+          .filter(t => totalQtyForProduct >= t.minQty)
+          .sort((a, b) => b.minQty - a.minQty)[0];
+        if (applicable) applicableDiscount = applicable.discountPercent;
+      }
+      const unitPrice = product.price * (1 - applicableDiscount / 100);
+
+      const itemTotal = unitPrice * item.quantity;
       total += itemTotal;
 
       orderItems.push({
         product: product._id,
         title: product.title,
         quantity: item.quantity,
-        price: product.price,
+        price: unitPrice,
         color: item.color,
+        flavor: item.flavor,
         note: item.note,
       });
     }
@@ -63,9 +80,17 @@ const createOrder = async (req, res, next) => {
 
     // Reduce stock - inventory auto update
     for (const item of orderItems) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: -item.quantity },
-      });
+      const updateQuery = { $inc: { stock: -item.quantity } };
+      
+      // If a flavor was ordered, decrease its specific stock too
+      if (item.flavor) {
+        await Product.findOneAndUpdate(
+          { _id: item.product, 'flavors.name': item.flavor },
+          { $inc: { stock: -item.quantity, 'flavors.$.stock': -item.quantity } }
+        );
+      } else {
+        await Product.findByIdAndUpdate(item.product, updateQuery);
+      }
     }
 
     const populatedOrder = await Order.findById(order._id)

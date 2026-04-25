@@ -55,6 +55,12 @@ const productSchema = new mongoose.Schema(
       type: String,
       trim: true,
     }],
+    flavors: [
+      {
+        name: { type: String, trim: true },
+        stock: { type: Number, min: 0, default: 0 },
+      }
+    ],
     details: {
       type: String,
     },
