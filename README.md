@@ -1,85 +1,68 @@
-# Ecommerce Full-Stack App
-this is for learning purpose
-Full-stack e-commerce application with Backend (Node.js + Express), Mobile App (React Native + Expo), and Admin Panel (React + Vite).
+# Shofy — Multi-Platform E-Commerce (Web Store, Admin Panel & Android App)
 
-## Tech Stack
+A production e-commerce system running a real retail store: a customer web shop, a full admin dashboard and an Android app, all powered by one Node.js/MongoDB API.
 
-- **Backend:** Node.js, Express, MongoDB (Mongoose), JWT, bcrypt, Stripe (optional)
-- **Mobile:** React Native, Expo, React Navigation, Reanimated, Lottie, Context API
-- **Admin:** React, Vite, Chart.js, React Router
+**Live store & admin:** https://admin-panel-phi-steel-84.vercel.app
+**API:** https://backend-nine-ruby-74.vercel.app/api/health
+**Android app:** [`Shofy-mobile-app.apk`](./Shofy-mobile-app.apk) · source: [Shofy-mobile-app](https://github.com/Maaz9703/Shofy-mobile-app)
 
-## Project Structure
+## What’s inside
+
+**Customer web store**
+- Product catalogue (800+ items) with search, categories and pagination
+- Cart, wishlist, saved addresses and checkout with coupons
+- Customer accounts with order history and order details
+
+**Admin dashboard**
+- Sales dashboard and reports with charts (Chart.js)
+- Products and inventory with low-stock alerts, CSV import
+- Orders, customers and customer insights
+- Coupons, reviews moderation, activity feed and store settings
+
+**Android app (React Native + Expo)**
+- Native shopping experience on the same API, built to APK via GitHub Actions
+
+**API (Node.js + Express)**
+- JWT authentication with role-based admin routes
+- Products, orders, reviews, coupons, wishlist, addresses, notifications and settings
+- Optional Stripe payments; image uploads with Multer
+- Serverless-ready on Vercel with cached MongoDB connections
+
+## Tech stack
+
+| Part | Tools |
+| --- | --- |
+| Web store + admin | React, Vite, React Router, Chart.js, Context API |
+| Mobile | React Native, Expo, React Navigation, Reanimated, Lottie |
+| Backend | Node.js, Express, MongoDB (Mongoose), JWT, bcrypt, Stripe, Multer |
+| Hosting | Vercel (web + API), GitHub Actions (APK builds) |
+
+## Project structure
 
 ```
-ecommerce-app/
-├── backend/          # Express API
-├── mobile-app/       # React Native Expo app
-└── admin-panel/      # React Vite admin dashboard
+admin-panel/   React + Vite — customer store (/) and admin dashboard
+backend/       Express API (routes, controllers, models, middleware)
+.github/       Workflow that builds the Android APK
 ```
 
-## Getting Started
-
-### 1. Backend
+## Run locally
 
 ```bash
+# API
 cd backend
-cp env.example .env   # Edit .env with your MongoDB URI and JWT_SECRET
+cp env.example .env        # set MONGODB_URI and JWT_SECRET
+npm install && npm run dev
+
+# Create an admin (credentials come from your environment, never from the repo)
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD='a-long-secret' node scripts/seedAdmin.js
+
+# Web store + admin
+cd ../admin-panel
 npm install
+echo VITE_API_URL=http://localhost:5000/api > .env
 npm run dev
 ```
 
-Create admin user:
-```bash
-node scripts/seedAdmin.js
-# Admin: admin@example.com / admin123
-```
+---
 
-Seed sample products:
-```bash
-node scripts/seedProducts.js
-```
-
-### 2. Mobile App
-
-```bash
-cd mobile-app
-npm install
-# Update API_URL in src/config/api.js to your backend URL (e.g., your machine's IP)
-npm start
-```
-
-### 3. Admin Panel
-
-```bash
-cd admin-panel
-npm install
-# Create .env with VITE_API_URL=http://localhost:5000/api (or use proxy)
-npm run dev
-```
-
-Login with admin credentials at http://localhost:3001
-
-## API Endpoints
-
-- **Auth:** POST /api/auth/register, /api/auth/login, GET /api/auth/me
-- **Products:** GET/POST /api/products, GET/PUT/DELETE /api/products/:id
-- **Orders:** GET/POST /api/orders, GET /api/orders/admin/all (admin)
-- **Addresses:** CRUD /api/addresses
-- **Wishlist:** GET/POST /api/wishlist, DELETE /api/wishlist/:productId
-- **Reviews:** GET /api/reviews/product/:id, POST /api/reviews
-- **Coupons:** POST /api/coupons/validate, Admin CRUD
-- **Stripe:** POST /api/orders/create-payment-intent
-
-## Features
-
-- User registration/login (JWT)
-- Product listing, search, category filter
-- Cart, Checkout (COD + Stripe ready)
-- Order management (admin)
-- Address management
-- Wishlist
-- Product reviews
-- Coupons
-- Dark mode (mobile)
-- Order tracking timeline
-- Revenue charts (admin)
+Built by [Maaz](https://github.com/Maaz9703).

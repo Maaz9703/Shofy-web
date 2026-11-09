@@ -1,6 +1,6 @@
 /**
- * Seed admin user - run: node scripts/seedAdmin.js
- * Creates admin user if not exists: admin@example.com / admin123
+ * Seed admin user - run: ADMIN_EMAIL=... ADMIN_PASSWORD=... node scripts/seedAdmin.js
+ * Creates the admin user if it does not exist. Never commit real credentials.
  */
 require('dotenv').config();
 const mongoose = require('mongoose');
@@ -17,8 +17,13 @@ const connectDB = async () => {
 };
 
 const seedAdmin = async () => {
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+  if (!email || !password || password.length < 10) {
+    console.error('Set ADMIN_EMAIL and ADMIN_PASSWORD (at least 10 characters) in the environment.');
+    process.exit(1);
+  }
   await connectDB();
-  const email = 'admin@example.com';
   const existing = await User.findOne({ email });
   if (existing) {
     if (existing.role === 'admin') {
@@ -35,10 +40,10 @@ const seedAdmin = async () => {
   await User.create({
     name: 'Trader Admin',
     email,
-    password: 'admin123',
+    password,
     role: 'admin',
   });
-  console.log('Admin user created: admin@example.com / admin123');
+  console.log(`Admin user created: ${email}`);
   process.exit(0);
 };
 
